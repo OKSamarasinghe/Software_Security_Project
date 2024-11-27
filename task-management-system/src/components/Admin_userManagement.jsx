@@ -7,9 +7,9 @@ export default function Admin_userManagement() {
 
   // Sample user data
   const [users, setUsers] = useState([
-    { user_id: 1, first_name: "John", last_name: "Doe", email: "john.doe@example.com", phoneNumber: "123-456-7890" },
-    { user_id: 2, first_name: "Jane", last_name: "Smith", email: "jane.smith@example.com", phoneNumber: "987-654-3210" },
-    { user_id: 3, first_name: "Alice", last_name: "Johnson", email: "alice.johnson@example.com", phoneNumber: "456-789-1234" },
+    { user_id: 1, first_name: "John", last_name: "Doe", email: "john.doe@example.com", phone_number: "123-456-7890" },
+    { user_id: 2, first_name: "Jane", last_name: "Smith", email: "jane.smith@example.com", phone_number: "987-654-3210" },
+    { user_id: 3, first_name: "Alice", last_name: "Johnson", email: "alice.johnson@example.com", phone_number: "456-789-1234" },
   ]);
 
   // Function to delete a user
@@ -155,7 +155,7 @@ export default function Admin_userManagement() {
                 <td style={tdStyle}>{user.first_name}</td>
                 <td style={tdStyle}>{user.last_name}</td>
                 <td style={tdStyle}>{user.email}</td>
-                <td style={tdStyle}>{user.phoneNumber}</td>
+                <td style={tdStyle}>{user.phone_number}</td>
                 <td style={tdStyle}>
                   <button
                     style={deleteButtonStyle}

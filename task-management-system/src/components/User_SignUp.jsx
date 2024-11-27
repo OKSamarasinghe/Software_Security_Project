@@ -3,10 +3,10 @@ import logo from "../assets/images/taskmasterlogo.png"; // Import the logo
 
 export default function UserSignUp() {
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
+    first_name: "",
+    last_name: "",
     email: "",
-    phoneNumber: "",
+    phone_number: "",
     password: "",
     confirmPassword: "",
   });
@@ -113,18 +113,18 @@ export default function UserSignUp() {
         <form onSubmit={handleSubmit}>
           <input
             type="text"
-            name="firstName"
+            name="first_name"
             placeholder="First Name"
-            value={formData.firstName}
+            value={formData.first_name}
             onChange={handleChange}
             required
             style={inputStyle}
           />
           <input
             type="text"
-            name="lastName"
+            name="last_name"
             placeholder="Last Name"
-            value={formData.lastName}
+            value={formData.last_name}
             onChange={handleChange}
             required
             style={inputStyle}
@@ -140,9 +140,9 @@ export default function UserSignUp() {
           />
           <input
             type="text"
-            name="phoneNumber"
+            name="phone_number"
             placeholder="Phone Number"
-            value={formData.phoneNumber}
+            value={formData.phone_number}
             onChange={handleChange}
             required
             style={inputStyle}
