@@ -1,7 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import logo from "../assets/images/taskmasterlogo.png"; // Import the logo
 
 export default function Admin_SignUp() {
+  // State for form inputs and error messages
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
+
+  // Styles
   const containerStyle = {
     height: "100vh",
     backgroundColor: "#f3f4f6",
@@ -48,6 +55,47 @@ export default function Admin_SignUp() {
     fontWeight: "bold",
   };
 
+  const errorStyle = {
+    color: "red",
+    fontSize: "0.875rem",
+    marginBottom: "1rem",
+  };
+
+  // Email validation regex
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+  // Password validation regex (minimum 8 characters, one uppercase, one number, one special character)
+  const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+  // Handle form submission
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    // Validate email
+    if (!emailRegex.test(email)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+
+    // Validate password
+    if (!passwordRegex.test(password)) {
+      setError("Password must be at least 8 characters, including an uppercase letter, a number, and a special character.");
+      return;
+    }
+
+    // Check if passwords match
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    // Reset error and simulate successful signup
+    setError("");
+    alert("Admin account successfully created!");
+
+    // You can add your logic for submitting the form data to the backend here.
+  };
+
   return (
     <div style={containerStyle}>
       <div style={cardStyle}>
@@ -64,24 +112,34 @@ export default function Admin_SignUp() {
         <p style={{ fontSize: "0.875rem", color: "#6b7280", marginBottom: "1rem" }}>
           Create your admin account.
         </p>
+
+        {/* Error message */}
+        {error && <p style={errorStyle}>{error}</p>}
+
         {/* Form */}
-        <form>
+        <form onSubmit={handleSubmit}>
           <input
             type="email"
             placeholder="Enter your email"
             required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             style={inputStyle}
           />
           <input
             type="password"
             placeholder="Enter password"
             required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             style={inputStyle}
           />
           <input
             type="password"
             placeholder="Confirm password"
             required
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
             style={inputStyle}
           />
 
@@ -89,6 +147,7 @@ export default function Admin_SignUp() {
             Sign up
           </button>
         </form>
+
         <p style={{ marginTop: "1rem", fontSize: "0.875rem" }}>
           Already have an account?{" "}
           <a href="/admin-signin" style={linkStyle}>
