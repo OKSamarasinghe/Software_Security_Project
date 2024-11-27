@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom"; // For navigation
+import axios from "axios"; // For API requests
 import logo from "../assets/images/taskmasterlogo.png"; // Import the logo
 
 export default function Admin_SignIn() {
@@ -10,37 +11,34 @@ export default function Admin_SignIn() {
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
-  // Hardcoded credentials for testing
-  const hardcodedEmail = "admin@gmail.com";
-  const hardcodedPassword = "Admin@1234";
-
-  // Regex patterns for validation
-  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-  const passwordRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-
   // Form submit handler
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Validate email and password
-    if (!emailRegex.test(email)) {
-      setErrorMessage("Invalid email format.");
-      return;
-    }
-
-    if (!passwordRegex.test(password)) {
-      setErrorMessage(
-        "Password must be at least 8 characters long and include uppercase, lowercase, number, and a special character."
-      );
-      return;
-    }
-
-    // Check hardcoded credentials
-    if (email === hardcodedEmail && password === hardcodedPassword) {
-      setErrorMessage(""); // Clear any error messages
-      navigate("/admin-home"); // Redirect to AdminHome
-    } else {
-      setErrorMessage("Incorrect email or password.");
+  
+    try {
+      const response = await axios.post("http://localhost:8080/admin/login", {
+        email,
+        password,
+      });
+  
+      if (response.status === 200) {
+        // Store admin data in localStorage
+        const adminData = {
+          admin_id: response.data.admin_id, // admin_id should be returned from the backend
+          email: email,
+        };
+  
+        localStorage.setItem("admin", JSON.stringify(adminData)); // Save admin data
+  
+        setErrorMessage("");
+        navigate("/admin-home"); // Redirect to Admin Home
+      }
+    } catch (error) {
+      if (error.response && error.response.status === 401) {
+        setErrorMessage("Incorrect email or password.");
+      } else {
+        setErrorMessage("Something went wrong. Please try again later.");
+      }
     }
   };
 
