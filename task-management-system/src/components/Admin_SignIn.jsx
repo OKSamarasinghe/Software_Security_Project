@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom"; // For navigation
 import axios from "axios"; // For API requests
+import DOMPurify from "dompurify"; // For sanitizing data
 import logo from "../assets/images/taskmasterlogo.png"; // Import the logo
 
 export default function Admin_SignIn() {
@@ -14,30 +15,34 @@ export default function Admin_SignIn() {
   // Form submit handler
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
+    // Sanitize email and password before sending to backend
+    const sanitizedEmail = DOMPurify.sanitize(email);
+    const sanitizedPassword = DOMPurify.sanitize(password);
+
     try {
       const response = await axios.post("http://localhost:8080/admin/login", {
-        email,
-        password,
+        email: sanitizedEmail,
+        password: sanitizedPassword,
       });
-  
+
       if (response.status === 200) {
         // Store admin data in localStorage
         const adminData = {
-          admin_id: response.data.admin_id, // admin_id should be returned from the backend
-          email: email,
+          admin_id: response.data.admin_id,
+          email: response.data.email,
         };
-  
-        localStorage.setItem("admin", JSON.stringify(adminData)); // Save admin data
-  
+
+        localStorage.setItem("admin", JSON.stringify(adminData)); // Save sanitized admin data
+
         setErrorMessage("");
         navigate("/admin-home"); // Redirect to Admin Home
       }
     } catch (error) {
       if (error.response && error.response.status === 401) {
-        setErrorMessage("Incorrect email or password.");
+        setErrorMessage(DOMPurify.sanitize("Incorrect email or password."));
       } else {
-        setErrorMessage("Something went wrong. Please try again later.");
+        setErrorMessage(DOMPurify.sanitize("Something went wrong. Please try again later."));
       }
     }
   };

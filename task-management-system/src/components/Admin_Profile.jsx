@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import DOMPurify from "dompurify"; // For sanitizing data
 import logo from "../assets/images/taskmasterlogo.png";
 
 export default function Admin_Profile() {
@@ -18,13 +19,18 @@ export default function Admin_Profile() {
     console.log("Admin data from localStorage:", adminData); // Log to verify data
 
     if (adminData) {
-      setAdminDetails(adminData); // Set the admin details from localStorage
+      // Sanitize the data before setting state
+      const sanitizedAdminData = {
+        admin_id: adminData.admin_id,
+        email: DOMPurify.sanitize(adminData.email), // Sanitize email to avoid any XSS risk
+      };
+      setAdminDetails(sanitizedAdminData); // Set the sanitized admin details
     } else {
       navigate("/admin-signin"); // Redirect to login if no admin data found
     }
   }, [navigate]);
 
-  // Styles (as you've already defined)
+  // Styles (unchanged from the provided code)
   const navbarStyle = {
     display: "flex",
     justifyContent: "space-between",
@@ -143,10 +149,11 @@ export default function Admin_Profile() {
       <div style={profileStyle}>
         <h1>Admin Profile</h1>
         <p style={detailStyle}>
-          <span style={labelStyle}>Admin ID:</span> {adminDetails.admin_id}
+          <span style={labelStyle}>Admin ID:</span>{" "}
+          {DOMPurify.sanitize(adminDetails.admin_id ? adminDetails.admin_id.toString() : "N/A")}
         </p>
         <p style={detailStyle}>
-          <span style={labelStyle}>Email:</span> {adminDetails.email}
+          <span style={labelStyle}>Email:</span> {DOMPurify.sanitize(adminDetails.email || "N/A")}
         </p>
       </div>
     </div>
