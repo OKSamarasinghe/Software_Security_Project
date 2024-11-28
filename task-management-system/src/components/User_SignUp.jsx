@@ -11,10 +11,19 @@ export default function UserSignUp() {
     confirmPassword: "",
   });
 
-  const [error, setError] = useState("");
+  const [error, setError] = useState({
+    first_name: "",
+    last_name: "",
+    email: "",
+    phone_number: "",
+    password: "",
+    confirmPassword: "",
+  });
+
+  const [generalError, setGeneralError] = useState("");
 
   const containerStyle = {
-    height: "100vh",
+    height: "140vh",
     backgroundColor: "#f3f4f6",
     display: "flex",
     justifyContent: "center",
@@ -23,7 +32,7 @@ export default function UserSignUp() {
 
   const cardStyle = {
     backgroundColor: "white",
-    padding: "2rem",
+    padding: "3.5rem",
     borderRadius: "8px",
     boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
     width: "100%",
@@ -59,33 +68,72 @@ export default function UserSignUp() {
     fontWeight: "bold",
   };
 
-  const forgotPasswordStyle = {
-    fontSize: "0.875rem",
-    color: "#22c55e",
-    textDecoration: "none",
-    marginLeft: "auto",
-    display: "block",
-    textAlign: "right",
+  const validateInput = (name, value) => {
+    switch (name) {
+      case "first_name":
+      case "last_name":
+        if (!/^[A-Za-z]{2,30}$/.test(value)) {
+          return "Only letters are allowed, with a minimum of 2 and a maximum of 30 characters.";
+        }
+        break;
+      case "email":
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          return "Invalid email format.";
+        }
+        break;
+      case "phone_number":
+        if (!/^\+?\d{10,15}$/.test(value)) {
+          return "Phone number must be 10-15 digits and can include a leading '+'.";
+        }
+        break;
+      case "password":
+        if (
+          !/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(
+            value
+          )
+        ) {
+          return "Password must be at least 8 characters long, include an uppercase letter, a number, and a special character.";
+        }
+        break;
+      case "confirmPassword":
+        if (value !== formData.password) {
+          return "Passwords do not match.";
+        }
+        break;
+      default:
+        break;
+    }
+    return "";
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+
+    const validationError = validateInput(name, value);
+    setError({ ...error, [name]: validationError });
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Simple validation for password match
-    if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match.");
+    // Validate all fields
+    const validationErrors = {};
+    Object.keys(formData).forEach((key) => {
+      validationErrors[key] = validateInput(key, formData[key]);
+    });
+
+    if (Object.values(validationErrors).some((err) => err)) {
+      setError(validationErrors);
+      setGeneralError("Please fix the errors above.");
       return;
     }
 
-    // Clear error
-    setError("");
+    // Clear errors
+    setError({});
+    setGeneralError("");
 
-    // Handle form submission logic here
+    // Proceed with form submission
     console.log("Form submitted:", formData);
   };
 
@@ -106,8 +154,8 @@ export default function UserSignUp() {
           Create an account to get started.
         </p>
 
-        {/* Error Message */}
-        {error && <p style={{ color: "red", fontSize: "0.875rem" }}>{error}</p>}
+        {/* General Error */}
+        {generalError && <p style={{ color: "red", fontSize: "0.875rem" }}>{generalError}</p>}
 
         {/* Sign Up Form */}
         <form onSubmit={handleSubmit}>
@@ -120,6 +168,9 @@ export default function UserSignUp() {
             required
             style={inputStyle}
           />
+          {error.first_name && (
+            <p style={{ color: "red", fontSize: "0.75rem" }}>{error.first_name}</p>
+          )}
           <input
             type="text"
             name="last_name"
@@ -129,6 +180,9 @@ export default function UserSignUp() {
             required
             style={inputStyle}
           />
+          {error.last_name && (
+            <p style={{ color: "red", fontSize: "0.75rem" }}>{error.last_name}</p>
+          )}
           <input
             type="email"
             name="email"
@@ -138,6 +192,9 @@ export default function UserSignUp() {
             required
             style={inputStyle}
           />
+          {error.email && (
+            <p style={{ color: "red", fontSize: "0.75rem" }}>{error.email}</p>
+          )}
           <input
             type="text"
             name="phone_number"
@@ -147,6 +204,9 @@ export default function UserSignUp() {
             required
             style={inputStyle}
           />
+          {error.phone_number && (
+            <p style={{ color: "red", fontSize: "0.75rem" }}>{error.phone_number}</p>
+          )}
           <input
             type="password"
             name="password"
@@ -156,6 +216,9 @@ export default function UserSignUp() {
             required
             style={inputStyle}
           />
+          {error.password && (
+            <p style={{ color: "red", fontSize: "0.75rem" }}>{error.password}</p>
+          )}
           <input
             type="password"
             name="confirmPassword"
@@ -165,6 +228,9 @@ export default function UserSignUp() {
             required
             style={inputStyle}
           />
+          {error.confirmPassword && (
+            <p style={{ color: "red", fontSize: "0.75rem" }}>{error.confirmPassword}</p>
+          )}
           <button type="submit" style={buttonStyle}>
             Sign Up
           </button>

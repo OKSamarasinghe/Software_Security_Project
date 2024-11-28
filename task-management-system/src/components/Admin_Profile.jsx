@@ -114,7 +114,7 @@ export default function Admin_Profile() {
           <button style={buttonStyle} onClick={() => navigate("/admin-profile")}>
             Profile
           </button>
-          <button style={buttonStyle} onClick={() => navigate("/admin-signin")}>
+          <button style={buttonStyle} onClick={() => navigate("/")}>
             Log Out
           </button>
         </div>

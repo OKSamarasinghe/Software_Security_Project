@@ -7,9 +7,9 @@ export default function Admin_Management() {
 
   // Sample admin data
   const [admins, setAdmins] = useState([
-    { admin_id: 1, email: "admin1@example.com", password: "password123" },
-    { admin_id: 2, email: "admin2@example.com", password: "password456" },
-    { admin_id: 3, email: "admin3@example.com", password: "password789" },
+    { admin_id: 1, email: "admin1@example.com" },
+    { admin_id: 2, email: "admin2@example.com" },
+    { admin_id: 3, email: "admin3@example.com" },
   ]);
 
   // Function to delete an admin
@@ -66,23 +66,32 @@ export default function Admin_Management() {
     cursor: "pointer",
   };
 
+  const tableContainerStyle = {
+    marginTop: "2rem",
+    padding: "1rem",
+    borderRadius: "8px",
+    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+    backgroundColor: "#ffffff",
+  };
+
   const tableStyle = {
     width: "100%",
     borderCollapse: "collapse",
-    marginTop: "2rem",
   };
 
   const thStyle = {
-    borderBottom: "1px solid #ddd",
-    padding: "0.75rem",
+    padding: "1rem",
     textAlign: "left",
-    backgroundColor: "#f3f4f6",
+    backgroundColor: "#22c55e",
+    color: "#fff",
     fontWeight: "bold",
+    borderBottom: "2px solid #ddd",
   };
 
   const tdStyle = {
+    padding: "1rem",
     borderBottom: "1px solid #ddd",
-    padding: "0.75rem",
+    fontSize: "1rem",
   };
 
   const deleteButtonStyle = {
@@ -92,6 +101,7 @@ export default function Admin_Management() {
     border: "none",
     borderRadius: "4px",
     cursor: "pointer",
+    fontWeight: "bold",
   };
 
   return (
@@ -135,15 +145,13 @@ export default function Admin_Management() {
       </nav>
 
       {/* Admin Management Table */}
-      <div style={{ padding: "2rem" }}>
-        <h1>Admin Management</h1>
+      <div style={tableContainerStyle}>
+        <h1 style={{ textAlign: "center", color: "#333" }}>Admin Management</h1>
         <table style={tableStyle}>
           <thead>
             <tr>
               <th style={thStyle}>Admin ID</th>
               <th style={thStyle}>Email</th>
-              <th style={thStyle}>Password</th>
-              <th style={thStyle}>Action</th>
             </tr>
           </thead>
           <tbody>
@@ -151,15 +159,6 @@ export default function Admin_Management() {
               <tr key={admin.admin_id}>
                 <td style={tdStyle}>{admin.admin_id}</td>
                 <td style={tdStyle}>{admin.email}</td>
-                <td style={tdStyle}>{admin.password}</td>
-                <td style={tdStyle}>
-                  <button
-                    style={deleteButtonStyle}
-                    onClick={() => handleDelete(admin.admin_id)}
-                  >
-                    Delete
-                  </button>
-                </td>
               </tr>
             ))}
           </tbody>

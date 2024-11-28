@@ -54,7 +54,7 @@ export default function Admin_SignIn() {
 
   const cardStyle = {
     backgroundColor: "white",
-    padding: "2rem",
+    padding: "3.5rem",
     borderRadius: "8px",
     boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
     width: "100%",

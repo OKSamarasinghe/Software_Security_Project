@@ -1,9 +1,23 @@
-import React from "react";
-import logo from "../assets/images/taskmasterlogo.png"; // Import the logo
-import { Link } from "react-router-dom";  // Import Link from react-router-dom
-
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom"; // Import useNavigate for routing
+import logo from "../assets/images/taskmasterlogo.png";
 
 export default function SignIn() {
+  const navigate = useNavigate();
+
+  // Hardcoded user credentials for testing
+  const hardcodedUser = {
+    email: "user@gmail.com",
+    password: "User@1234",
+  };
+
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+
+  const [error, setError] = useState("");
+
   const containerStyle = {
     height: "100vh",
     backgroundColor: "#f3f4f6",
@@ -14,7 +28,7 @@ export default function SignIn() {
 
   const cardStyle = {
     backgroundColor: "white",
-    padding: "2rem",
+    padding: "3.5rem",
     borderRadius: "8px",
     boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
     width: "100%",
@@ -59,12 +73,52 @@ export default function SignIn() {
     textAlign: "right",
   };
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    // Email validation regex
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    // Password validation regex (at least one uppercase, one lowercase, one digit, one special character, min length 8)
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+    // Check if email is valid
+    if (!emailRegex.test(formData.email)) {
+      setError("Invalid email format.");
+      return;
+    }
+
+    // Check if password is valid
+    if (!passwordRegex.test(formData.password)) {
+      setError(
+        "Password must be at least 8 characters long, include one uppercase letter, one lowercase letter, one number, and one special character."
+      );
+      return;
+    }
+
+    // Check if email and password match hardcoded credentials
+    if (
+      formData.email === hardcodedUser.email &&
+      formData.password === hardcodedUser.password
+    ) {
+      setError(""); // Clear any errors
+      navigate("/user-home"); // Redirect to user home page
+    } else {
+      setError("Invalid email or password.");
+    }
+  };
+
   return (
     <div style={containerStyle}>
       <div style={cardStyle}>
-      <a href="/admin-signin" style={forgotPasswordStyle}>
-            Admin Login
-          </a>
+        <a href="/admin-signin" style={forgotPasswordStyle}>
+          Admin Login
+        </a>
         {/* Logo */}
         <img
           src={logo}
@@ -78,24 +132,31 @@ export default function SignIn() {
         <p style={{ fontSize: "0.875rem", color: "#6b7280", marginBottom: "1rem" }}>
           Welcome! Please enter your details.
         </p>
+        {/* Error Message */}
+        {error && <p style={{ color: "red", fontSize: "0.875rem" }}>{error}</p>}
         {/* Form */}
-        <form>
+        <form onSubmit={handleSubmit}>
           <input
             type="email"
+            name="email"
             placeholder="Enter your email"
+            value={formData.email}
+            onChange={handleChange}
             required
             style={inputStyle}
           />
           <input
             type="password"
+            name="password"
             placeholder="Enter password"
+            value={formData.password}
+            onChange={handleChange}
             required
             style={inputStyle}
           />
           <a href="#" style={forgotPasswordStyle}>
             Forgot password?
           </a>
-          
           <button type="submit" style={buttonStyle}>
             Sign in
           </button>
