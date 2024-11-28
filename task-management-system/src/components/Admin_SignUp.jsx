@@ -1,5 +1,7 @@
 import React, { useState } from "react";
+import axios from "axios"; // For API requests
 import logo from "../assets/images/taskmasterlogo.png"; // Import the logo
+import DOMPurify from "dompurify"; // For sanitizing data
 
 export default function Admin_SignUp() {
   // State for form inputs and error messages
@@ -8,7 +10,7 @@ export default function Admin_SignUp() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
 
-  // Styles
+  // Styles (same as before)
   const containerStyle = {
     height: "100vh",
     backgroundColor: "#f3f4f6",
@@ -68,32 +70,55 @@ export default function Admin_SignUp() {
   const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
   // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Sanitize the inputs before validating them
+    const sanitizedEmail = DOMPurify.sanitize(email);
+    const sanitizedPassword = DOMPurify.sanitize(password);
+    const sanitizedConfirmPassword = DOMPurify.sanitize(confirmPassword);
+    
     // Validate email
-    if (!emailRegex.test(email)) {
+    if (!emailRegex.test(sanitizedEmail)) {
       setError("Please enter a valid email address.");
       return;
     }
 
     // Validate password
-    if (!passwordRegex.test(password)) {
+    if (!passwordRegex.test(sanitizedPassword)) {
       setError("Password must be at least 8 characters, including an uppercase letter, a number, and a special character.");
       return;
     }
 
     // Check if passwords match
-    if (password !== confirmPassword) {
+    if (sanitizedPassword !== sanitizedConfirmPassword) {
       setError("Passwords do not match.");
       return;
     }
 
-    // Reset error and simulate successful signup
+    // Reset error and send data to backend
     setError("");
-    alert("Admin account successfully created!");
+    
+    // Make API request to register admin
+    try {
+      const response = await axios.post("http://localhost:8080/admin/register", {
+        email: sanitizedEmail,
+        password: sanitizedPassword,
+        confirmPassword: sanitizedConfirmPassword,
+      });
 
-    // You can add your logic for submitting the form data to the backend here.
+      // Handle successful response
+      if (response.status === 200) {
+        alert("Admin account successfully created!");
+      }
+    } catch (error) {
+      // Handle error response
+      if (error.response) {
+        setError(error.response.data || "Something went wrong. Please try again later.");
+      } else {
+        setError("Network error. Please try again.");
+      }
+    }
   };
 
   return (
