@@ -1,17 +1,30 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/images/taskmasterlogo.png";
 
 export default function Admin_Profile() {
   const navigate = useNavigate();
 
-  // Dummy admin details (replace with real data after backend integration)
-  const adminDetails = {
-    admin_id: 101,
-    email: "admin@example.com",
-  };
+  // State to hold admin details
+  const [adminDetails, setAdminDetails] = useState({
+    admin_id: null,
+    email: "",
+  });
 
-  // Styles
+  // Fetch admin details from localStorage when the component mounts
+  useEffect(() => {
+    const adminData = JSON.parse(localStorage.getItem("admin"));
+
+    console.log("Admin data from localStorage:", adminData); // Log to verify data
+
+    if (adminData) {
+      setAdminDetails(adminData); // Set the admin details from localStorage
+    } else {
+      navigate("/admin-signin"); // Redirect to login if no admin data found
+    }
+  }, [navigate]);
+
+  // Styles (as you've already defined)
   const navbarStyle = {
     display: "flex",
     justifyContent: "space-between",
@@ -114,7 +127,7 @@ export default function Admin_Profile() {
           <button style={buttonStyle} onClick={() => navigate("/admin-profile")}>
             Profile
           </button>
-          <button style={buttonStyle} onClick={() => navigate("/")}>
+          <button style={buttonStyle} onClick={() => navigate("/admin-signin")}>
             Log Out
           </button>
         </div>
