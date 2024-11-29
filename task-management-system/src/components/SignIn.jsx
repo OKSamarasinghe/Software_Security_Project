@@ -1,23 +1,15 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate for routing
-import logo from "../assets/images/taskmasterlogo.png";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import ReCAPTCHA from "react-google-recaptcha";
+import logo from "../assets/images/taskmasterlogo.png"; // Your logo path
 
 export default function SignIn() {
   const navigate = useNavigate();
 
-  // Hardcoded user credentials for testing
-  const hardcodedUser = {
-    email: "user@gmail.com",
-    password: "User@1234",
-  };
-
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
-
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
+  const [recaptchaToken, setRecaptchaToken] = useState(null);
 
   const containerStyle = {
     height: "100vh",
@@ -82,24 +74,8 @@ export default function SignIn() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Email validation regex
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    // Password validation regex (at least one uppercase, one lowercase, one digit, one special character, min length 8)
-    const passwordRegex =
-      /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-
-    // Check if email is valid
-    if (!emailRegex.test(formData.email)) {
-      setError("Invalid email format.");
-      return;
-    }
-
-    // Check if password is valid
-    if (!passwordRegex.test(formData.password)) {
-      setError(
-        "Password must be at least 8 characters long, include one uppercase letter, one lowercase letter, one number, and one special character."
-      );
+    if (!recaptchaToken) {
+      setError("Please complete the reCAPTCHA to continue.");
       return;
     }
 
@@ -110,15 +86,9 @@ export default function SignIn() {
       });
 
       if (response.status === 200) {
-        const userData = {
-          user_id: response.data.user_id,
-          email: response.data.email,
-        };
-
-        localStorage.setItem("user", JSON.stringify(userData)); // Store user data in localStorage
-
-        setError(""); // Clear any errors
-        navigate("/user-home"); // Redirect to user home page
+        localStorage.setItem("user", JSON.stringify(response.data));
+        setError("");
+        navigate("/user-home");
       } else {
         setError("Invalid email or password.");
       }
@@ -176,6 +146,11 @@ export default function SignIn() {
             onChange={handleChange}
             required
             style={inputStyle}
+          />
+          <ReCAPTCHA
+            sitekey="6LdfZo0qAAAAAMmi3pjIUIfbSyf3gIp-kUJlag2e"
+            onChange={(token) => setRecaptchaToken(token)}
+            onExpired={() => setRecaptchaToken(null)}
           />
           <a href="#" style={forgotPasswordStyle}>
             Forgot password?

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom"; // For navigation
 import axios from "axios"; // For API requests
 import DOMPurify from "dompurify"; // For sanitizing data
 import logo from "../assets/images/taskmasterlogo.png"; // Import the logo
+import ReCAPTCHA from "react-google-recaptcha";
 
 export default function Admin_SignIn() {
   const navigate = useNavigate(); // Hook for navigation
@@ -11,10 +12,16 @@ export default function Admin_SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [recaptchaToken, setRecaptchaToken] = useState(null);
 
   // Form submit handler
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!recaptchaToken) {
+      setErrorMessage("Please complete the reCAPTCHA.");
+      return;
+    }
 
     // Sanitize email and password before sending to backend
     const sanitizedEmail = DOMPurify.sanitize(email);
@@ -42,7 +49,9 @@ export default function Admin_SignIn() {
       if (error.response && error.response.status === 401) {
         setErrorMessage(DOMPurify.sanitize("Incorrect email or password."));
       } else {
-        setErrorMessage(DOMPurify.sanitize("Something went wrong. Please try again later."));
+        setErrorMessage(
+          DOMPurify.sanitize("Something went wrong. Please try again later.")
+        );
       }
     }
   };
@@ -118,10 +127,22 @@ export default function Admin_SignIn() {
           style={{ marginBottom: "-1rem", width: "100px", height: "auto" }}
         />
         {/* Heading */}
-        <h2 style={{ fontSize: "1.5rem", fontWeight: "bold", marginBottom: "0.5rem" }}>
+        <h2
+          style={{
+            fontSize: "1.5rem",
+            fontWeight: "bold",
+            marginBottom: "0.5rem",
+          }}
+        >
           Admin Sign In
         </h2>
-        <p style={{ fontSize: "0.875rem", color: "#6b7280", marginBottom: "1rem" }}>
+        <p
+          style={{
+            fontSize: "0.875rem",
+            color: "#6b7280",
+            marginBottom: "1rem",
+          }}
+        >
           Welcome! Please enter your details.
         </p>
         {/* Form */}
@@ -142,6 +163,11 @@ export default function Admin_SignIn() {
             onChange={(e) => setPassword(e.target.value)}
             required
             style={inputStyle}
+          />
+          <ReCAPTCHA
+            sitekey="6LdfZo0qAAAAAMmi3pjIUIfbSyf3gIp-kUJlag2e"
+            onChange={(token) => setRecaptchaToken(token)}
+            onExpired={() => setRecaptchaToken(null)}
           />
           <a href="#" style={forgotPasswordStyle}>
             Forgot password?
