@@ -179,7 +179,7 @@ export default function Admin_Management() {
           <tbody>
             {admins.map((admin) => (
               <tr key={admin.admin_id}>
-                <td style={tdStyle}>{admin.admin_id}</td>
+                <td style={tdStyle}>{admin.id}</td>
                 <td style={tdStyle}>{admin.email}</td>
                  
               </tr>
