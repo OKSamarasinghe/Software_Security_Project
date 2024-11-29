@@ -1,78 +1,30 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate for routing
-import logo from "../assets/images/taskmasterlogo.png";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import ReCAPTCHA from "react-google-recaptcha";
+import logo from "../assets/images/taskmasterlogo.png"; // Your logo path
 
 export default function SignIn() {
   const navigate = useNavigate();
-
-  // Hardcoded user credentials for testing
-  const hardcodedUser = {
-    email: "user@gmail.com",
-    password: "User@1234",
-  };
-
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
-
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
+  const [recaptchaToken, setRecaptchaToken] = useState(null);
 
-  const containerStyle = {
-    height: "100vh",
-    backgroundColor: "#f3f4f6",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-  };
+  useEffect(() => {
+    // Push a new state to prevent going back
+    window.history.pushState(null, null, window.location.href);
 
-  const cardStyle = {
-    backgroundColor: "white",
-    padding: "3.5rem",
-    borderRadius: "8px",
-    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-    width: "100%",
-    maxWidth: "400px",
-    textAlign: "center",
-  };
+    const handleBackButton = (event) => {
+      event.preventDefault();
+      window.history.pushState(null, null, window.location.href);
+    };
 
-  const inputStyle = {
-    width: "100%",
-    padding: "0.5rem 1rem",
-    margin: "0.5rem 0",
-    borderRadius: "4px",
-    border: "1px solid #d1d5db",
-    fontSize: "1rem",
-  };
+    window.addEventListener("popstate", handleBackButton);
 
-  const buttonStyle = {
-    width: "100%",
-    padding: "0.75rem 1rem",
-    backgroundColor: "#22c55e",
-    color: "white",
-    fontSize: "1rem",
-    fontWeight: "bold",
-    borderRadius: "4px",
-    border: "none",
-    cursor: "pointer",
-    marginTop: "1rem",
-  };
-
-  const linkStyle = {
-    color: "#22c55e",
-    textDecoration: "none",
-    fontWeight: "bold",
-  };
-
-  const forgotPasswordStyle = {
-    fontSize: "0.875rem",
-    color: "#22c55e",
-    textDecoration: "none",
-    marginLeft: "auto",
-    display: "block",
-    textAlign: "right",
-  };
+    return () => {
+      window.removeEventListener("popstate", handleBackButton);
+    };
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -82,24 +34,8 @@ export default function SignIn() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Email validation regex
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    // Password validation regex (at least one uppercase, one lowercase, one digit, one special character, min length 8)
-    const passwordRegex =
-      /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-
-    // Check if email is valid
-    if (!emailRegex.test(formData.email)) {
-      setError("Invalid email format.");
-      return;
-    }
-
-    // Check if password is valid
-    if (!passwordRegex.test(formData.password)) {
-      setError(
-        "Password must be at least 8 characters long, include one uppercase letter, one lowercase letter, one number, and one special character."
-      );
+    if (!recaptchaToken) {
+      setError("Please complete the reCAPTCHA to continue.");
       return;
     }
 
@@ -109,40 +45,58 @@ export default function SignIn() {
         password: formData.password,
       });
 
-      // If login is successful, store user data and navigate
       if (response.status === 200) {
-        const userData = {
-          user_id: response.data.user_id,
-          email: response.data.email,
-        };
-
-        localStorage.setItem("user", JSON.stringify(userData)); // Store user data in localStorage
-
-        setError(""); // Clear any errors
-        navigate("/user-home"); // Redirect to user home page
+        localStorage.setItem("user", JSON.stringify(response.data));
+        setError("");
+        navigate("/user-home");
       } else {
         setError("Invalid email or password.");
       }
     } catch (error) {
-      // Handle errors from the API
       console.error("Login API error:", error);
       setError("Something went wrong. Please try again.");
     }
   };
 
   return (
-    <div style={containerStyle}>
-      <div style={cardStyle}>
-        <a href="/admin-signin" style={forgotPasswordStyle}>
+    <div
+      style={{
+        height: "100vh",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "#f3f4f6",
+      }}
+    >
+      <div
+        style={{
+          backgroundColor: "white",
+          padding: "3.5rem",
+          borderRadius: "8px",
+          boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+          width: "100%",
+          maxWidth: "400px",
+          textAlign: "center",
+        }}
+      >
+        <a
+          href="/admin-signin"
+          style={{
+            fontSize: "0.875rem",
+            color: "#22c55e",
+            textDecoration: "none",
+            marginLeft: "auto",
+            display: "block",
+            textAlign: "right",
+          }}
+        >
           Admin Login
         </a>
-        {/* Logo */}
         <img
           src={logo}
           alt="Task Master Logo"
           style={{ marginBottom: "-1rem", width: "100px", height: "auto" }}
         />
-        {/* Heading */}
         <h2
           style={{
             fontSize: "1.5rem",
@@ -161,9 +115,7 @@ export default function SignIn() {
         >
           Welcome! Please enter your details.
         </p>
-        {/* Error Message */}
         {error && <p style={{ color: "red", fontSize: "0.875rem" }}>{error}</p>}
-        {/* Form */}
         <form onSubmit={handleSubmit}>
           <input
             type="email"
@@ -172,7 +124,14 @@ export default function SignIn() {
             value={formData.email}
             onChange={handleChange}
             required
-            style={inputStyle}
+            style={{
+              width: "100%",
+              padding: "0.5rem 1rem",
+              margin: "0.5rem 0",
+              borderRadius: "4px",
+              border: "1px solid #d1d5db",
+              fontSize: "1rem",
+            }}
           />
           <input
             type="password"
@@ -181,18 +140,61 @@ export default function SignIn() {
             value={formData.password}
             onChange={handleChange}
             required
-            style={inputStyle}
+            style={{
+              width: "100%",
+              padding: "0.5rem 1rem",
+              margin: "0.5rem 0",
+              borderRadius: "4px",
+              border: "1px solid #d1d5db",
+              fontSize: "1rem",
+            }}
           />
-          <a href="#" style={forgotPasswordStyle}>
+          <ReCAPTCHA
+            sitekey="6LdfZo0qAAAAAMmi3pjIUIfbSyf3gIp-kUJlag2e"
+            onChange={(token) => setRecaptchaToken(token)}
+            onExpired={() => setRecaptchaToken(null)}
+          />
+          <a
+            href="#"
+            style={{
+              fontSize: "0.875rem",
+              color: "#22c55e",
+              textDecoration: "none",
+              marginLeft: "auto",
+              display: "block",
+              textAlign: "right",
+            }}
+          >
             Forgot password?
           </a>
-          <button type="submit" style={buttonStyle}>
+          <button
+            type="submit"
+            style={{
+              width: "100%",
+              padding: "0.75rem 1rem",
+              backgroundColor: "#22c55e",
+              color: "white",
+              fontSize: "1rem",
+              fontWeight: "bold",
+              borderRadius: "4px",
+              border: "none",
+              cursor: "pointer",
+              marginTop: "1rem",
+            }}
+          >
             Sign in
           </button>
         </form>
         <p style={{ marginTop: "1rem", fontSize: "0.875rem" }}>
           Don’t have an account?{" "}
-          <a href="/signup" style={linkStyle}>
+          <a
+            href="/signup"
+            style={{
+              color: "#22c55e",
+              textDecoration: "none",
+              fontWeight: "bold",
+            }}
+          >
             Sign up
           </a>
         </p>
