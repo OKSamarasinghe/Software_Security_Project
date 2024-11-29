@@ -109,7 +109,6 @@ export default function SignIn() {
         password: formData.password,
       });
 
-      // If login is successful, store user data and navigate
       if (response.status === 200) {
         const userData = {
           user_id: response.data.user_id,
@@ -124,7 +123,6 @@ export default function SignIn() {
         setError("Invalid email or password.");
       }
     } catch (error) {
-      // Handle errors from the API
       console.error("Login API error:", error);
       setError("Something went wrong. Please try again.");
     }
@@ -136,13 +134,11 @@ export default function SignIn() {
         <a href="/admin-signin" style={forgotPasswordStyle}>
           Admin Login
         </a>
-        {/* Logo */}
         <img
           src={logo}
           alt="Task Master Logo"
           style={{ marginBottom: "-1rem", width: "100px", height: "auto" }}
         />
-        {/* Heading */}
         <h2
           style={{
             fontSize: "1.5rem",
@@ -161,9 +157,7 @@ export default function SignIn() {
         >
           Welcome! Please enter your details.
         </p>
-        {/* Error Message */}
         {error && <p style={{ color: "red", fontSize: "0.875rem" }}>{error}</p>}
-        {/* Form */}
         <form onSubmit={handleSubmit}>
           <input
             type="email"
