@@ -1,21 +1,43 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios"; // For API requests
 import logo from "../assets/images/taskmasterlogo.png";
 
 export default function Admin_Management() {
   const navigate = useNavigate();
 
-  // Sample admin data
-  const [admins, setAdmins] = useState([
-    { admin_id: 1, email: "admin1@example.com" },
-    { admin_id: 2, email: "admin2@example.com" },
-    { admin_id: 3, email: "admin3@example.com" },
-  ]);
+  // State for admin data
+  const [admins, setAdmins] = useState([]);
+
+  // Fetch admins from the backend
+  useEffect(() => {
+    const fetchAdmins = async () => {
+      try {
+        const response = await axios.get("http://localhost:8080/admin/all"); // Backend endpoint
+        setAdmins(response.data);
+      } catch (error) {
+        console.error("Error fetching admin data:", error);
+      }
+    };
+
+    fetchAdmins();
+  }, []);
 
   // Function to delete an admin
-  const handleDelete = (adminId) => {
-    const updatedAdmins = admins.filter((admin) => admin.admin_id !== adminId);
-    setAdmins(updatedAdmins);
+  const handleDelete = async (adminId) => {
+    // Display confirmation dialog
+    const confirmDelete = window.confirm("Are you sure you want to delete this admin?");
+    if (!confirmDelete) return;
+
+    try {
+      // Proceed with deletion if confirmed
+      await axios.delete(`http://localhost:8080/admin/delete/${adminId}`);
+      setAdmins((prevAdmins) => prevAdmins.filter((admin) => admin.admin_id !== adminId));
+      alert("Admin deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting admin:", error.response?.data || error.message);
+      alert("Failed to delete admin. Please try again.");
+    }
   };
 
   // Styles
@@ -152,6 +174,7 @@ export default function Admin_Management() {
             <tr>
               <th style={thStyle}>Admin ID</th>
               <th style={thStyle}>Email</th>
+              <th style={thStyle}>Action</th>
             </tr>
           </thead>
           <tbody>
@@ -159,6 +182,14 @@ export default function Admin_Management() {
               <tr key={admin.admin_id}>
                 <td style={tdStyle}>{admin.admin_id}</td>
                 <td style={tdStyle}>{admin.email}</td>
+                <td style={tdStyle}>
+                  <button
+                    style={deleteButtonStyle}
+                    onClick={() => handleDelete(admin.admin_id)}
+                  >
+                    Delete
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
