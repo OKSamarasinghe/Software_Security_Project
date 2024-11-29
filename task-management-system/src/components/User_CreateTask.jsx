@@ -110,8 +110,15 @@ export default function User_CreateTask() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const { title, description, date } = formData;
-    const storedUser = JSON.parse(localStorage.getItem("user"));
-    const userId = 1;
+
+    // Fetch user data from localStorage
+    const userData = JSON.parse(localStorage.getItem("user"));
+    const userId = userData ? userData.user_id : null; // Dynamically get the user_id from localStorage
+
+    if (!userId) {
+      setError("User not logged in. Please log in first.");
+      return;
+    }
 
     if (!title || !description || !date) {
       setError("All fields are required.");
@@ -128,14 +135,9 @@ export default function User_CreateTask() {
     }
 
     try {
-      // if (!userId) {
-      //   setError("User not logged in.");
-      //   return;
-      // }
-
-      // Correct API endpoint with dynamic userId
+      // Send POST request to create task with dynamic user_id
       const response = await axios.post(
-        `http://localhost:8080/task/users/${userId}/addtask`, // Use template literal here
+        `http://localhost:8080/task/users/${userId}/addtask`, // Use dynamic userId in the URL
         {
           title,
           description,
@@ -144,15 +146,13 @@ export default function User_CreateTask() {
         }
       );
 
-      if (response.status === 201) {
+      if (response.status === 200) {
         alert("Task created successfully!");
         setFormData({ title: "", description: "", date: "" });
         navigate("/user-view-task"); // Redirect to the tasks page after creation
       } else {
-        alert("Task created successfully!");
-        setFormData({ title: "", description: "", date: "" });
-        navigate("/user-home"); // Redirect to the tasks page after creation
-        //setError("Failed to create task. Please try again.");
+        alert("Failed to create task.");
+        setError("Failed to create task. Please try again.");
       }
     } catch (err) {
       console.error(err);

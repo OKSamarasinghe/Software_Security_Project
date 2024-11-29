@@ -9,11 +9,26 @@ export default function UserHome() {
   const [tasks, setTasks] = useState([]);
   const [error, setError] = useState("");
 
+  // Get user data from localStorage
+  const userData = JSON.parse(localStorage.getItem("user")); // Get the user object from localStorage
+
+  // Check if user data exists and retrieve user_id
+  const userId = userData ? userData.user_id : null; // Use null or handle the case when user is not logged in
+
   useEffect(() => {
+    // If userId is null, redirect to login or handle appropriately
+    if (!userId) {
+      setError("User not found or not logged in");
+      return;
+    }
+
     // Function to fetch tasks from the API
     const fetchTasks = async () => {
       try {
-        const response = await axios.get("http://localhost:8080/task/gettasks"); // Replace with your API endpoint
+        // Fetch tasks using the userId from localStorage
+        const response = await axios.get(
+          `http://localhost:8080/task/users/${userId}/tasks`
+        );
         setTasks(response.data); // Assuming response.data contains the array of tasks
       } catch (error) {
         console.error("Error fetching tasks:", error);
@@ -21,8 +36,8 @@ export default function UserHome() {
       }
     };
 
-    fetchTasks();
-  }, []); // Empty dependency array ensures this runs once on component mount
+    fetchTasks(); // Fetch tasks when the component mounts
+  }, [userId]); // The effect depends on userId
 
   const navbarStyle = {
     display: "flex",
@@ -135,7 +150,7 @@ export default function UserHome() {
         <div style={taskContainerStyle}>
           {tasks.length > 0 ? (
             tasks.map((task) => (
-              <div key={task.id} style={taskCardStyle}>
+              <div key={task.task_id} style={taskCardStyle}>
                 <div style={taskTitleStyle}>{task.title}</div>
                 <div style={taskDescriptionStyle}>{task.description}</div>
                 <div style={taskDateStyle}>{task.date}</div>
