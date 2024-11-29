@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import axios from "axios"; // Make sure Axios is imported for HTTP requests
 import logo from "../assets/images/taskmasterlogo.png";
 
 export default function User_TaskEdit() {
@@ -7,17 +8,28 @@ export default function User_TaskEdit() {
   const location = useLocation();
 
   // Validate incoming state
-  const task = location.state?.task && typeof location.state.task === "object"
-    ? location.state.task
-    : {
-        task_id: "",
-        title: "",
-        description: "",
-        date: "",
-      };
+  const task =
+    location.state?.task && typeof location.state.task === "object"
+      ? location.state.task
+      : {
+          task_id: "",
+          title: "",
+          description: "",
+          date: "",
+        };
 
   const [formData, setFormData] = useState({ ...task });
   const [error, setError] = useState("");
+
+  // Get user data from localStorage
+  const userData = JSON.parse(localStorage.getItem("user")); // Get the user object from localStorage
+  const userId = userData ? userData.user_id : null; // Use null or handle the case when user is not logged in
+
+  useEffect(() => {
+    if (!task || !task.task_id) {
+      setError("Task not found.");
+    }
+  }, [task]);
 
   // Navbar styles
   const navbarStyle = {
@@ -93,8 +105,8 @@ export default function User_TaskEdit() {
     setFormData({ ...formData, [name]: sanitizedValue });
   };
 
-  // Handle form submission
-  const handleSubmit = (e) => {
+  // Handle form submission to update the task
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Validation for special characters in title and description
@@ -124,12 +136,23 @@ export default function User_TaskEdit() {
       return;
     }
 
-    // Simulate success message
-    alert("Task updated successfully!");
-    console.log("Updated Task Data:", formData);
+    try {
+      // Send PUT request to update the task
+      const response = await axios.put(
+        `http://localhost:8080/task/users/${userId}/updatetask/${task.task_id}`,
+        formData
+      );
 
-    // Navigate back to the task view page
-    navigate("/user-view-task");
+      if (response.status === 200) {
+        alert("Task updated successfully!");
+        navigate("/user-view-task"); // Redirect back to the task view page after successful update
+      } else {
+        setError("Failed to update task. Please try again.");
+      }
+    } catch (err) {
+      console.error("Error updating task:", err);
+      setError("An error occurred while updating the task.");
+    }
   };
 
   return (
@@ -148,7 +171,10 @@ export default function User_TaskEdit() {
           <button style={buttonStyle} onClick={() => navigate("/user-home")}>
             Home
           </button>
-          <button style={buttonStyle} onClick={() => navigate("/user-create-task")}>
+          <button
+            style={buttonStyle}
+            onClick={() => navigate("/user-create-task")}
+          >
             Create Task
           </button>
           <button style={buttonStyle} onClick={() => navigate("/user-profile")}>

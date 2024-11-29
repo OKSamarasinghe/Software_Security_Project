@@ -1,9 +1,15 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios"; // Import Axios for making API requests
 import logo from "../assets/images/taskmasterlogo.png";
 
 export default function User_Profile() {
   const navigate = useNavigate();
+
+  // State to store user details and loading/error states
+  const [user, setUser] = useState(null);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const navbarStyle = {
     display: "flex",
@@ -37,14 +43,42 @@ export default function User_Profile() {
     cursor: "pointer",
   };
 
-  // Dummy user details for now
-  const user = {
-    user_id: "12345",
-    first_name: "John",
-    last_name: "Doe",
-    email: "johndoe@example.com",
-    phone_number: "+1234567890",
+  // Function to fetch user data from API
+  const fetchUserDetails = async () => {
+    const userData = JSON.parse(localStorage.getItem("user"));
+    const userId = userData ? userData.user_id : null;
+
+    if (!userId) {
+      setError("User is not logged in.");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await axios.get(
+        `http://localhost:8080/user/getuser/${userId}`
+      );
+      setUser(response.data);
+      setLoading(false);
+    } catch (err) {
+      console.error("Error fetching user data:", err);
+      setError("Failed to fetch user details. Please try again.");
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    fetchUserDetails(); // Fetch user details when the component mounts
+  }, []);
+
+  // If still loading or there's an error, show respective messages
+  if (loading) {
+    return <div>Loading user details...</div>;
+  }
+
+  if (error) {
+    return <div>{error}</div>;
+  }
 
   return (
     <div>
@@ -62,7 +96,10 @@ export default function User_Profile() {
           <button style={buttonStyle} onClick={() => navigate("/user-home")}>
             Home
           </button>
-          <button style={buttonStyle} onClick={() => navigate("/user-view-task")}>
+          <button
+            style={buttonStyle}
+            onClick={() => navigate("/user-view-task")}
+          >
             View Tasks
           </button>
           <button style={buttonStyle} onClick={() => navigate("/user-profile")}>
@@ -75,7 +112,15 @@ export default function User_Profile() {
       </nav>
 
       {/* Profile Content */}
-      <div style={{ backgroundColor: "#f3f4f6", minHeight: "100vh", display: "flex", justifyContent: "center", alignItems: "center" }}>
+      <div
+        style={{
+          backgroundColor: "#f3f4f6",
+          minHeight: "100vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
         <div
           style={{
             backgroundColor: "#fff",
@@ -87,13 +132,27 @@ export default function User_Profile() {
             textAlign: "center",
           }}
         >
-          <h1 style={{ fontSize: "2rem", color: "green", fontWeight: "bold", marginBottom: "1rem" }}>
+          <h1
+            style={{
+              fontSize: "2rem",
+              color: "green",
+              fontWeight: "bold",
+              marginBottom: "1rem",
+            }}
+          >
             User Profile
           </h1>
-          <p style={{ fontSize: "1.125rem", color: "#6b7280", marginBottom: "2rem" }}>
+          <p
+            style={{
+              fontSize: "1.125rem",
+              color: "#6b7280",
+              marginBottom: "2rem",
+            }}
+          >
             Here are your profile details.
           </p>
 
+          {/* Display user details dynamically */}
           <div
             style={{
               display: "flex",
@@ -121,8 +180,6 @@ export default function User_Profile() {
             <div style={{ fontWeight: "bold" }}>Phone Number:</div>
             <div>{user.phone_number}</div>
           </div>
-
-          
         </div>
       </div>
     </div>
