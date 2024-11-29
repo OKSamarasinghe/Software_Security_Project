@@ -169,7 +169,6 @@ export default function Admin_Management() {
             <tr>
               <th style={thStyle}>Admin ID</th>
               <th style={thStyle}>Email</th>
-              <th style={thStyle}>Action</th>
             </tr>
           </thead>
           <tbody>
@@ -177,14 +176,7 @@ export default function Admin_Management() {
               <tr key={admin.admin_id}>
                 <td style={tdStyle}>{admin.id}</td>
                 <td style={tdStyle}>{admin.email}</td>
-                <td style={tdStyle}>
-                  <button
-                    style={deleteButtonStyle}
-                    onClick={() => handleDelete(admin.id)}
-                  >
-                    Delete
-                  </button>
-                </td>
+                 
               </tr>
             ))}
           </tbody>
