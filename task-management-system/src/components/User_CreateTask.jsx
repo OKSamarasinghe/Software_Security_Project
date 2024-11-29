@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios"; // Import Axios for HTTP requests
 import logo from "../assets/images/taskmasterlogo.png";
 
 export default function User_CreateTask() {
@@ -77,17 +78,17 @@ export default function User_CreateTask() {
 
   const validateInput = (name, value) => {
     if (name === "title" || name === "description") {
-      const regex = /^[a-zA-Z0-9\s.,'-]{1,100}$/; // Allow alphanumeric and limited punctuation, up to 100 characters.
+      const regex = /^[a-zA-Z0-9\s.,'-]{1,100}$/;
       return regex.test(value);
     }
     if (name === "date") {
-      const regex = /^\d{4}-\d{2}-\d{2}$/; // YYYY-MM-DD format.
+      const regex = /^\d{4}-\d{2}-\d{2}$/;
       if (!regex.test(value)) return false;
 
       const today = new Date();
       const inputDate = new Date(value);
-      today.setHours(0, 0, 0, 0); // Normalize today's date to midnight.
-      return inputDate >= today; // Ensure the date is not in the past.
+      today.setHours(0, 0, 0, 0);
+      return inputDate >= today;
     }
     return true;
   };
@@ -96,7 +97,7 @@ export default function User_CreateTask() {
     const { name, value } = e.target;
     if (validateInput(name, value)) {
       setFormData({ ...formData, [name]: value });
-      setError(""); // Clear error if input becomes valid.
+      setError("");
     } else {
       if (name === "date") {
         setError("Task date cannot be in the past.");
@@ -106,16 +107,17 @@ export default function User_CreateTask() {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const { title, description, date } = formData;
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    const userId = 2;
 
     if (!title || !description || !date) {
       setError("All fields are required.");
       return;
     }
 
-    // Final validation before submission
     if (
       !validateInput("title", title) ||
       !validateInput("description", description) ||
@@ -125,15 +127,37 @@ export default function User_CreateTask() {
       return;
     }
 
-    // Clear errors and simulate task creation
-    setError("");
-    console.log("Task Created:", formData);
+    try {
+      // if (!userId) {
+      //   setError("User not logged in.");
+      //   return;
+      // }
 
-    // Reset form after successful submission
-    setFormData({ title: "", description: "", date: "" });
+      // Correct API endpoint with dynamic userId
+      const response = await axios.post(
+        `http://localhost:8080/task/users/${userId}/addtask`, // Use template literal here
+        {
+          title,
+          description,
+          date,
+          user_id: userId,
+        }
+      );
 
-    // Notify the user
-    alert("Task created successfully!");
+      if (response.status === 201) {
+        alert("Task created successfully!");
+        setFormData({ title: "", description: "", date: "" });
+        navigate("/user-view-task"); // Redirect to the tasks page after creation
+      } else {
+        alert("Task created successfully!");
+        setFormData({ title: "", description: "", date: "" });
+        navigate("/user-home"); // Redirect to the tasks page after creation
+        //setError("Failed to create task. Please try again.");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("An error occurred while creating the task.");
+    }
   };
 
   return (
@@ -152,7 +176,10 @@ export default function User_CreateTask() {
           <button style={buttonStyle} onClick={() => navigate("/user-home")}>
             Home
           </button>
-          <button style={buttonStyle} onClick={() => navigate("/user-view-task")}>
+          <button
+            style={buttonStyle}
+            onClick={() => navigate("/user-view-task")}
+          >
             View Tasks
           </button>
           <button style={buttonStyle} onClick={() => navigate("/user-profile")}>
@@ -166,9 +193,13 @@ export default function User_CreateTask() {
 
       {/* Form */}
       <div style={formStyle}>
-        <h2 style={{ textAlign: "center", marginBottom: "1rem" }}>Create a New Task</h2>
+        <h2 style={{ textAlign: "center", marginBottom: "1rem" }}>
+          Create a New Task
+        </h2>
         {error && (
-          <p style={{ color: "red", textAlign: "center", marginBottom: "1rem" }}>
+          <p
+            style={{ color: "red", textAlign: "center", marginBottom: "1rem" }}
+          >
             {error}
           </p>
         )}

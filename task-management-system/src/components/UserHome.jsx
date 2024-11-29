@@ -1,9 +1,28 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import logo from "../assets/images/taskmasterlogo.png";
 
 export default function UserHome() {
   const navigate = useNavigate();
+
+  const [tasks, setTasks] = useState([]);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    // Function to fetch tasks from the API
+    const fetchTasks = async () => {
+      try {
+        const response = await axios.get("http://localhost:8080/task/gettasks"); // Replace with your API endpoint
+        setTasks(response.data); // Assuming response.data contains the array of tasks
+      } catch (error) {
+        console.error("Error fetching tasks:", error);
+        setError("Failed to load tasks. Please try again later.");
+      }
+    };
+
+    fetchTasks();
+  }, []); // Empty dependency array ensures this runs once on component mount
 
   const navbarStyle = {
     display: "flex",
@@ -68,13 +87,6 @@ export default function UserHome() {
     fontSize: "0.9rem",
   };
 
-  const [tasks] = useState([
-    { id: 1, title: "Task 1", description: "Description 1", date: "2024-11-28" },
-    { id: 2, title: "Task 2", description: "Description 2", date: "2024-11-29" },
-    { id: 3, title: "Task 3", description: "Description 3", date: "2024-12-01" },
-    { id: 4, title: "Task 4", description: "Description 4", date: "2024-12-05" },
-  ]);
-
   return (
     <div>
       {/* Navbar */}
@@ -90,10 +102,16 @@ export default function UserHome() {
 
         {/* Action Buttons */}
         <div style={actionStyle}>
-          <button style={buttonStyle} onClick={() => navigate("/user-create-task")}>
+          <button
+            style={buttonStyle}
+            onClick={() => navigate("/user-create-task")}
+          >
             Create Task
           </button>
-          <button style={buttonStyle} onClick={() => navigate("/user-view-task")}>
+          <button
+            style={buttonStyle}
+            onClick={() => navigate("/user-view-task")}
+          >
             View Tasks
           </button>
           <button style={buttonStyle} onClick={() => navigate("/user-profile")}>
@@ -110,15 +128,22 @@ export default function UserHome() {
         <h1>Welcome to the User Home Page</h1>
         <p>Explore your tasks and manage them efficiently.</p>
 
+        {/* Error Message */}
+        {error && <p style={{ color: "red" }}>{error}</p>}
+
         {/* Task Cards */}
         <div style={taskContainerStyle}>
-          {tasks.map((task) => (
-            <div key={task.id} style={taskCardStyle}>
-              <div style={taskTitleStyle}>{task.title}</div>
-              <div style={taskDescriptionStyle}>{task.description}</div>
-              <div style={taskDateStyle}>{task.date}</div>
-            </div>
-          ))}
+          {tasks.length > 0 ? (
+            tasks.map((task) => (
+              <div key={task.id} style={taskCardStyle}>
+                <div style={taskTitleStyle}>{task.title}</div>
+                <div style={taskDescriptionStyle}>{task.description}</div>
+                <div style={taskDateStyle}>{task.date}</div>
+              </div>
+            ))
+          ) : (
+            <p>No tasks available.</p>
+          )}
         </div>
       </div>
     </div>
