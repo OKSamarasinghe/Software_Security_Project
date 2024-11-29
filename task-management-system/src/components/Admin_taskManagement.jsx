@@ -1,39 +1,42 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import logo from "../assets/images/taskmasterlogo.png";
 
 export default function Admin_taskManagement() {
   const navigate = useNavigate();
 
-  // Sample task data with task_id
-  const [tasks, setTasks] = useState([
-    {
-      user_id: 1,
-      task_id: "T001",
-      title: "Complete Design Document",
-      description: "Finalize the design document for the project.",
-      date: "2024-11-27",
-    },
-    {
-      user_id: 2,
-      task_id: "T002",
-      title: "Fix Backend Issues",
-      description: "Resolve bugs in the authentication module.",
-      date: "2024-11-28",
-    },
-    {
-      user_id: 3,
-      task_id: "T003",
-      title: "Prepare Presentation",
-      description: "Create slides for the client presentation.",
-      date: "2024-11-30",
-    },
-  ]);
+  // State to hold tasks fetched from the backend
+  const [tasks, setTasks] = useState([]);
+
+  // Fetch tasks from the backend
+  useEffect(() => {
+    const fetchTasks = async () => {
+      try {
+        const response = await axios.get("http://localhost:8080/task/gettask");
+        console.log("Tasks fetched from backend:", response.data); // Check if user_id is present
+        setTasks(response.data);
+      } catch (error) {
+        console.error("Error fetching tasks:", error);
+      }
+    };
+  
+    fetchTasks();
+  }, []);
 
   // Function to delete a task
-  const handleDelete = (userId) => {
-    const updatedTasks = tasks.filter((task) => task.user_id !== userId);
-    setTasks(updatedTasks);
+  const handleDelete = async (taskId) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this task?");
+    if (!confirmDelete) return;
+
+    try {
+      await axios.delete(`http://localhost:8080/task/deletetask/${taskId}`); // Replace with your delete API
+      setTasks((prevTasks) => prevTasks.filter((task) => task.task_id !== taskId)); // Update tasks in state
+      alert("Task deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting task:", error);
+      alert("Failed to delete the task.");
+    }
   };
 
   // Styles
@@ -116,7 +119,6 @@ export default function Admin_taskManagement() {
     <div>
       {/* Navbar */}
       <nav style={navbarStyle}>
-        {/* Logo */}
         <div style={logoStyle} onClick={() => navigate("/")}>
           <img
             src={logo}
@@ -125,7 +127,6 @@ export default function Admin_taskManagement() {
           />
         </div>
 
-        {/* Menu */}
         <ul style={menuStyle}>
           <li style={menuItemStyle} onClick={() => navigate("/admin-home")}>
             Admin Home
@@ -141,7 +142,6 @@ export default function Admin_taskManagement() {
           </li>
         </ul>
 
-        {/* Profile and Logout Buttons */}
         <div style={actionStyle}>
           <button style={buttonStyle} onClick={() => navigate("/admin-profile")}>
             Profile
@@ -159,7 +159,7 @@ export default function Admin_taskManagement() {
           <thead>
             <tr>
               <th style={thStyle}>User ID</th>
-              <th style={thStyle}>Task ID</th> {/* New Task ID Column */}
+              <th style={thStyle}>Task ID</th>
               <th style={thStyle}>Title</th>
               <th style={thStyle}>Description</th>
               <th style={thStyle}>Date</th>
@@ -167,24 +167,24 @@ export default function Admin_taskManagement() {
             </tr>
           </thead>
           <tbody>
-            {tasks.map((task) => (
-              <tr key={task.user_id}>
-                <td style={tdStyle}>{task.user_id}</td>
-                <td style={tdStyle}>{task.task_id}</td> {/* Display Task ID */}
-                <td style={tdStyle}>{task.title}</td>
-                <td style={tdStyle}>{task.description}</td>
-                <td style={tdStyle}>{task.date}</td>
-                <td style={tdStyle}>
-                  <button
-                    style={deleteButtonStyle}
-                    onClick={() => handleDelete(task.user_id)}
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
+  {tasks.map((task) => (
+    <tr key={task.task_id}>
+      <td style={tdStyle}>{task.user_id || "Unknown User"}</td> {/* Fetch from response */}
+      <td style={tdStyle}>{task.task_id}</td>
+      <td style={tdStyle}>{task.title}</td>
+      <td style={tdStyle}>{task.description}</td>
+      <td style={tdStyle}>{task.date}</td>
+      <td style={tdStyle}>
+        <button
+          style={deleteButtonStyle}
+          onClick={() => handleDelete(task.task_id)}
+        >
+          Delete
+        </button>
+      </td>
+    </tr>
+  ))}
+</tbody>
         </table>
       </div>
     </div>

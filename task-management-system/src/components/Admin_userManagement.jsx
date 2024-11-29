@@ -1,21 +1,42 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import logo from "../assets/images/taskmasterlogo.png";
 
 export default function Admin_userManagement() {
   const navigate = useNavigate();
 
-  // Sample user data
-  const [users, setUsers] = useState([
-    { user_id: 1, first_name: "John", last_name: "Doe", email: "john.doe@example.com", phone_number: "123-456-7890" },
-    { user_id: 2, first_name: "Jane", last_name: "Smith", email: "jane.smith@example.com", phone_number: "987-654-3210" },
-    { user_id: 3, first_name: "Alice", last_name: "Johnson", email: "alice.johnson@example.com", phone_number: "456-789-1234" },
-  ]);
+  // State to store users fetched from the backend
+  const [users, setUsers] = useState([]);
+
+  // Fetch users from the backend when the component mounts
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await axios.get("http://localhost:8080/user/getusers"); // Update with your backend URL
+        console.log("Users fetched from backend:", response.data); // Debugging logs
+        setUsers(response.data); // Set the fetched data to state
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      }
+    };
+
+    fetchUsers();
+  }, []);
 
   // Function to delete a user
-  const handleDelete = (userId) => {
-    const updatedUsers = users.filter((user) => user.user_id !== userId);
-    setUsers(updatedUsers);
+  const handleDelete = async (userId) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this user?");
+    if (!confirmDelete) return;
+
+    try {
+      await axios.delete(`http://localhost:8080/user/deleteuser/${userId}`); // Adjust endpoint for deleting a user
+      setUsers((prevUsers) => prevUsers.filter((user) => user.user_id !== userId));
+      alert("User deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      alert("Failed to delete the user.");
+    }
   };
 
   // Styles
@@ -98,7 +119,6 @@ export default function Admin_userManagement() {
     <div>
       {/* Navbar */}
       <nav style={navbarStyle}>
-        {/* Logo */}
         <div style={logoStyle} onClick={() => navigate("/")}>
           <img
             src={logo}
@@ -107,7 +127,6 @@ export default function Admin_userManagement() {
           />
         </div>
 
-        {/* Menu */}
         <ul style={menuStyle}>
           <li style={menuItemStyle} onClick={() => navigate("/admin-home")}>
             Admin Home
@@ -123,7 +142,6 @@ export default function Admin_userManagement() {
           </li>
         </ul>
 
-        {/* Profile and Logout Buttons */}
         <div style={actionStyle}>
           <button style={buttonStyle} onClick={() => navigate("/admin-profile")}>
             Profile
