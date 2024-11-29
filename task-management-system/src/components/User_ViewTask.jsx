@@ -22,24 +22,29 @@ export default function User_ViewTask() {
   }, []);
 
   const handleDelete = (task_id) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this task?"
-    );
+    console.log("Deleting task with ID:", task_id);
+    const confirmDelete = window.confirm("Are you sure you want to delete this task?");
     if (confirmDelete) {
-      // Call API to delete task
-      fetch(`http://localhost:8080/task/delete/${task_id}`, {
+      fetch(`http://localhost:8080/task/deletetask/${task_id}`, {
         method: "DELETE",
       })
         .then((response) => {
+          console.log("Response from server:", response);
           if (response.ok) {
-            setTasks(tasks.filter((task) => task.id !== task_id)); // Update local state after deletion
+            setTasks((prevTasks) => prevTasks.filter((task) => task.task_id !== task_id));
+            alert("Task deleted successfully!");
           } else {
-            alert("Failed to delete task");
+            console.error("Failed to delete task:", response.statusText);
+            alert("Failed to delete task. Please try again.");
           }
         })
-        .catch((error) => console.error("Error deleting task:", error));
+        .catch((error) => {
+          console.error("Error deleting task:", error);
+          alert("Failed to delete task. Please try again.");
+        });
     }
   };
+  
 
   // Styling for the component
   const navbarStyle = {
@@ -157,7 +162,7 @@ export default function User_ViewTask() {
                           backgroundColor: "#f56565",
                           color: "white",
                         }}
-                        onClick={() => handleDelete(task.id)}
+                        onClick={() => handleDelete(task.task_id)}
                       >
                         Delete
                       </button>

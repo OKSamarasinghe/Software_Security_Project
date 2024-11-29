@@ -111,7 +111,7 @@ export default function User_CreateTask() {
     e.preventDefault();
     const { title, description, date } = formData;
     const storedUser = JSON.parse(localStorage.getItem("user"));
-    const userId = 2;
+    const userId = 1;
 
     if (!title || !description || !date) {
       setError("All fields are required.");
