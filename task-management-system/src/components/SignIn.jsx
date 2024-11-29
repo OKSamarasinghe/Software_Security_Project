@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom"; // Import useNavigate for routing
 import logo from "../assets/images/taskmasterlogo.png";
+import axios from "axios";
 
 export default function SignIn() {
   const navigate = useNavigate();
@@ -78,14 +79,15 @@ export default function SignIn() {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Email validation regex
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     // Password validation regex (at least one uppercase, one lowercase, one digit, one special character, min length 8)
-    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    const passwordRegex =
+      /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
     // Check if email is valid
     if (!emailRegex.test(formData.email)) {
@@ -101,15 +103,30 @@ export default function SignIn() {
       return;
     }
 
-    // Check if email and password match hardcoded credentials
-    if (
-      formData.email === hardcodedUser.email &&
-      formData.password === hardcodedUser.password
-    ) {
-      setError(""); // Clear any errors
-      navigate("/user-home"); // Redirect to user home page
-    } else {
-      setError("Invalid email or password.");
+    try {
+      const response = await axios.post("http://localhost:8080/user/login", {
+        email: formData.email,
+        password: formData.password,
+      });
+
+      // If login is successful, store user data and navigate
+      if (response.status === 200) {
+        const userData = {
+          user_id: response.data.user_id,
+          email: response.data.email,
+        };
+
+        localStorage.setItem("user", JSON.stringify(userData)); // Store user data in localStorage
+
+        setError(""); // Clear any errors
+        navigate("/user-home"); // Redirect to user home page
+      } else {
+        setError("Invalid email or password.");
+      }
+    } catch (error) {
+      // Handle errors from the API
+      console.error("Login API error:", error);
+      setError("Something went wrong. Please try again.");
     }
   };
 
@@ -126,10 +143,22 @@ export default function SignIn() {
           style={{ marginBottom: "-1rem", width: "100px", height: "auto" }}
         />
         {/* Heading */}
-        <h2 style={{ fontSize: "1.5rem", fontWeight: "bold", marginBottom: "0.5rem" }}>
+        <h2
+          style={{
+            fontSize: "1.5rem",
+            fontWeight: "bold",
+            marginBottom: "0.5rem",
+          }}
+        >
           Task Management System
         </h2>
-        <p style={{ fontSize: "0.875rem", color: "#6b7280", marginBottom: "1rem" }}>
+        <p
+          style={{
+            fontSize: "0.875rem",
+            color: "#6b7280",
+            marginBottom: "1rem",
+          }}
+        >
           Welcome! Please enter your details.
         </p>
         {/* Error Message */}

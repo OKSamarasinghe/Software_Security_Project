@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import logo from "../assets/images/taskmasterlogo.png"; // Import the logo
+import axios from "axios";
 
 export default function UserSignUp() {
   const [formData, setFormData] = useState({
@@ -114,7 +115,7 @@ export default function UserSignUp() {
     setError({ ...error, [name]: validationError });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Validate all fields
@@ -135,6 +136,28 @@ export default function UserSignUp() {
 
     // Proceed with form submission
     console.log("Form submitted:", formData);
+
+    try {
+      // Make the API request
+      const response = await axios.post(
+        "http://localhost:8080/user/adduser",
+        formData
+      );
+
+      // Handle successful registration
+      console.log("User registered successfully:", response.data);
+      alert("User registered successfully!");
+    } catch (error) {
+      // Handle errors from the API
+      console.error(
+        "Error during registration:",
+        error.response || error.message
+      );
+      setGeneralError(
+        error.response?.data?.message ||
+          "Something went wrong. Please try again."
+      );
+    }
   };
 
   return (
@@ -147,15 +170,29 @@ export default function UserSignUp() {
           style={{ marginBottom: "-1rem", width: "100px", height: "auto" }}
         />
         {/* Heading */}
-        <h2 style={{ fontSize: "1.5rem", fontWeight: "bold", marginBottom: "0.5rem" }}>
+        <h2
+          style={{
+            fontSize: "1.5rem",
+            fontWeight: "bold",
+            marginBottom: "0.5rem",
+          }}
+        >
           User Sign Up
         </h2>
-        <p style={{ fontSize: "0.875rem", color: "#6b7280", marginBottom: "1rem" }}>
+        <p
+          style={{
+            fontSize: "0.875rem",
+            color: "#6b7280",
+            marginBottom: "1rem",
+          }}
+        >
           Create an account to get started.
         </p>
 
         {/* General Error */}
-        {generalError && <p style={{ color: "red", fontSize: "0.875rem" }}>{generalError}</p>}
+        {generalError && (
+          <p style={{ color: "red", fontSize: "0.875rem" }}>{generalError}</p>
+        )}
 
         {/* Sign Up Form */}
         <form onSubmit={handleSubmit}>
@@ -169,7 +206,9 @@ export default function UserSignUp() {
             style={inputStyle}
           />
           {error.first_name && (
-            <p style={{ color: "red", fontSize: "0.75rem" }}>{error.first_name}</p>
+            <p style={{ color: "red", fontSize: "0.75rem" }}>
+              {error.first_name}
+            </p>
           )}
           <input
             type="text"
@@ -181,7 +220,9 @@ export default function UserSignUp() {
             style={inputStyle}
           />
           {error.last_name && (
-            <p style={{ color: "red", fontSize: "0.75rem" }}>{error.last_name}</p>
+            <p style={{ color: "red", fontSize: "0.75rem" }}>
+              {error.last_name}
+            </p>
           )}
           <input
             type="email"
@@ -205,7 +246,9 @@ export default function UserSignUp() {
             style={inputStyle}
           />
           {error.phone_number && (
-            <p style={{ color: "red", fontSize: "0.75rem" }}>{error.phone_number}</p>
+            <p style={{ color: "red", fontSize: "0.75rem" }}>
+              {error.phone_number}
+            </p>
           )}
           <input
             type="password"
@@ -217,7 +260,9 @@ export default function UserSignUp() {
             style={inputStyle}
           />
           {error.password && (
-            <p style={{ color: "red", fontSize: "0.75rem" }}>{error.password}</p>
+            <p style={{ color: "red", fontSize: "0.75rem" }}>
+              {error.password}
+            </p>
           )}
           <input
             type="password"
@@ -229,7 +274,9 @@ export default function UserSignUp() {
             style={inputStyle}
           />
           {error.confirmPassword && (
-            <p style={{ color: "red", fontSize: "0.75rem" }}>{error.confirmPassword}</p>
+            <p style={{ color: "red", fontSize: "0.75rem" }}>
+              {error.confirmPassword}
+            </p>
           )}
           <button type="submit" style={buttonStyle}>
             Sign Up
