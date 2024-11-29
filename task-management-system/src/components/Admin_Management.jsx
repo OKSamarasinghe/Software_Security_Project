@@ -27,17 +27,12 @@ export default function Admin_Management() {
   const handleDelete = async (adminId) => {
     // Display confirmation dialog
     const confirmDelete = window.confirm("Are you sure you want to delete this admin?");
-    
-    if (!confirmDelete) {
-      // If user cancels, exit the function
-      return;
-    }
-  
+    if (!confirmDelete) return;
+
     try {
       // Proceed with deletion if confirmed
-      const response = await axios.delete(`http://localhost:8080/admin/delete/${adminId}`);
-      console.log(response.data); // Log success message
-      setAdmins((prevAdmins) => prevAdmins.filter((admin) => admin.id !== adminId));
+      await axios.delete(`http://localhost:8080/admin/delete/${adminId}`);
+      setAdmins((prevAdmins) => prevAdmins.filter((admin) => admin.admin_id !== adminId));
       alert("Admin deleted successfully!");
     } catch (error) {
       console.error("Error deleting admin:", error.response?.data || error.message);
@@ -93,23 +88,32 @@ export default function Admin_Management() {
     cursor: "pointer",
   };
 
+  const tableContainerStyle = {
+    marginTop: "2rem",
+    padding: "1rem",
+    borderRadius: "8px",
+    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+    backgroundColor: "#ffffff",
+  };
+
   const tableStyle = {
     width: "100%",
     borderCollapse: "collapse",
-    marginTop: "2rem",
   };
 
   const thStyle = {
-    borderBottom: "1px solid #ddd",
-    padding: "0.75rem",
+    padding: "1rem",
     textAlign: "left",
-    backgroundColor: "#f3f4f6",
+    backgroundColor: "#22c55e",
+    color: "#fff",
     fontWeight: "bold",
+    borderBottom: "2px solid #ddd",
   };
 
   const tdStyle = {
+    padding: "1rem",
     borderBottom: "1px solid #ddd",
-    padding: "0.75rem",
+    fontSize: "1rem",
   };
 
   const deleteButtonStyle = {
@@ -119,6 +123,7 @@ export default function Admin_Management() {
     border: "none",
     borderRadius: "4px",
     cursor: "pointer",
+    fontWeight: "bold",
   };
 
   return (
@@ -162,8 +167,8 @@ export default function Admin_Management() {
       </nav>
 
       {/* Admin Management Table */}
-      <div style={{ padding: "2rem" }}>
-        <h1>Admin Management</h1>
+      <div style={tableContainerStyle}>
+        <h1 style={{ textAlign: "center", color: "#333" }}>Admin Management</h1>
         <table style={tableStyle}>
           <thead>
             <tr>
@@ -174,7 +179,7 @@ export default function Admin_Management() {
           <tbody>
             {admins.map((admin) => (
               <tr key={admin.admin_id}>
-                <td style={tdStyle}>{admin.id}</td>
+                <td style={tdStyle}>{admin.admin_id}</td>
                 <td style={tdStyle}>{admin.email}</td>
                  
               </tr>

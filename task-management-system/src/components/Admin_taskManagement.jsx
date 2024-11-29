@@ -5,22 +5,25 @@ import logo from "../assets/images/taskmasterlogo.png";
 export default function Admin_taskManagement() {
   const navigate = useNavigate();
 
-  // Sample task data
+  // Sample task data with task_id
   const [tasks, setTasks] = useState([
     {
       user_id: 1,
+      task_id: "T001",
       title: "Complete Design Document",
       description: "Finalize the design document for the project.",
       date: "2024-11-27",
     },
     {
       user_id: 2,
+      task_id: "T002",
       title: "Fix Backend Issues",
       description: "Resolve bugs in the authentication module.",
       date: "2024-11-28",
     },
     {
       user_id: 3,
+      task_id: "T003",
       title: "Prepare Presentation",
       description: "Create slides for the client presentation.",
       date: "2024-11-30",
@@ -156,6 +159,7 @@ export default function Admin_taskManagement() {
           <thead>
             <tr>
               <th style={thStyle}>User ID</th>
+              <th style={thStyle}>Task ID</th> {/* New Task ID Column */}
               <th style={thStyle}>Title</th>
               <th style={thStyle}>Description</th>
               <th style={thStyle}>Date</th>
@@ -166,6 +170,7 @@ export default function Admin_taskManagement() {
             {tasks.map((task) => (
               <tr key={task.user_id}>
                 <td style={tdStyle}>{task.user_id}</td>
+                <td style={tdStyle}>{task.task_id}</td> {/* Display Task ID */}
                 <td style={tdStyle}>{task.title}</td>
                 <td style={tdStyle}>{task.description}</td>
                 <td style={tdStyle}>{task.date}</td>
